@@ -36,6 +36,9 @@ while True:
             socket.send_json(Tablets[len(arr_ip_tablet)])
             # send to that ip
 
+        for server in arr_ip_tablet:
+            ip = server['ip']
+
     except zmq.Again as e:
         print("No message received yet")
 
