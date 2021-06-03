@@ -1,6 +1,7 @@
 import pymongo
 import json
 import pandas as pd
+import math
 
 def importData(csv_path):
     data = pd.read_csv(csv_path)
@@ -14,6 +15,9 @@ def database ():
         dblist = myclient.list_database_names()
         if "mydatabase" in dblist:
             print("The database exists.")
+            mydb = myclient["mydatabase"]
+            mycol = mydb["apps"]
+            return mycol
         else:
             mydb = myclient["mydatabase"]
             print("The database created.")
@@ -21,7 +25,23 @@ def database ():
             mycol = mydb["apps"]
             #mycol.delete_many()
             mycol.insert_many(data)
+            return mycol
     except: 
         print("Can't connect to database")
 
-database()
+mycol = database()
+BigTable = mycol.find().sort("Category")
+Categories = mycol.distinct("Category")
+NoOfCategories = len(Categories)
+Tablets = [[],[],[],[]]
+NoOfCategoriesPerTablet = math.floor(NoOfCategories/4)
+NoInCurrentTablet = 0
+TabletNo = 0
+for i in range(NoOfCategories):
+    if NoInCurrentTablet == 8 and TabletNo < 3:
+        NoInCurrentTablet = 0
+        TabletNo += 1
+    myquery = {"Category":Categories[i]}
+    category = list(mycol.find(myquery))
+    Tablets[TabletNo].append(category)
+    NoInCurrentTablet += 1
