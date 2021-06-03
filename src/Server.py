@@ -3,7 +3,7 @@ from zmq.sugar import socket
 context = zmq.Context()
 
 socket = context.socket(zmq.REP)
-socket.bind("tcp://127.0.0.1:7777")
+socket.bind("tcp://127.0.0.1:8001")
 
 while True:
     msg = socket.recv()
