@@ -35,7 +35,10 @@ while True:
             socket.send_json(Tablets[len(arr_ip_tablet)-1])
             socket.send_json(Tablets[len(arr_ip_tablet)])
             # send to that ip
-
+        elif msg == "data":
+            # meta data change
+            operation = socket.recv("")
+            pass
         for server in arr_ip_tablet:
             ip = server['ip']
 
