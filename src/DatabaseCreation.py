@@ -37,11 +37,22 @@ Tablets = [[],[],[],[]]
 NoOfCategoriesPerTablet = math.floor(NoOfCategories/4)
 NoInCurrentTablet = 0
 TabletNo = 0
+TabletPerMachine = 2
+Machine = 2
+dicTabletinMachine = {}
+dicCategoryinTablet = {}
 for i in range(NoOfCategories):
-    if NoInCurrentTablet == 8 and TabletNo < 3:
+    if NoInCurrentTablet == NoOfCategoriesPerTablet and TabletNo < 3:
+        dicTabletinMachine[TabletNo] = Machine
         NoInCurrentTablet = 0
         TabletNo += 1
+        if TabletNo == TabletPerMachine:
+            Machine += 1
     myquery = {"Category":Categories[i]}
     category = list(mycol.find(myquery))
     Tablets[TabletNo].append(category)
+    dicCategoryinTablet[Categories[i]] = TabletNo
     NoInCurrentTablet += 1
+dicTabletinMachine[TabletNo] = Machine
+print(dicTabletinMachine)
+print(dicCategoryinTablet)
