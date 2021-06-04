@@ -1,0 +1,12 @@
+1 - start master
+
+2 - load database if not loaded
+
+3 - start servers
+	i  - server send the active signal to master
+	ii - master sends ack signal and data which is:
+		a. port on which it will run the socket to clients
+		b. tablets 
+4 - start clients
+	i  - Master send the metadata to be cached.
+	ii - 
