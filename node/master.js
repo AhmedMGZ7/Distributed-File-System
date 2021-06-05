@@ -35,42 +35,38 @@ async function loadBalance() {
 console.log(tabCount)		
   categories.forEach(category => {
 	console.log(currentTabletSize, category.total)
-	// if tablet still has space take the category
-	if (currentTabletSize + category.total < tabCount) {
-	  catTabletDict[category._id] = currentTablet
-	  currentTabletSize += category.total
-	}
-	else {
-		// tablet is full and not the last tablet
-		if (currentTablet < 3) {
-			tabletSizes[currentTablet] = currentTabletSize
-			currentTablet += 1
-			currentTabletSize = 0
-			catTabletDict[category._id] = currentTablet
-		  	currentTabletSize += category.total
-		}
-		// last tablet takes all the remaining
-		else {
-		  catTabletDict[category._id] = currentTablet
-		  currentTabletSize += category.total
-		}
-	}
-}) 
-tabletSizes[3] = currentTabletSize
+	
+  // If tablet is full and not the last one go to next
+  if (currentTabletSize + category.total > tabCount && currentTablet < 3) {
+    tabletSizes[currentTablet] = currentTabletSize;
+    currentTablet += 1;
+    currentTabletSize = 0;
+  }
+
+  catTabletDict[category._id] = currentTablet;
+  currentTabletSize += category.total;
+})
+
+  tabletSizes[3] = currentTabletSize
   console.log(catTabletDict)
   console.log(tabletSizes)
 	let tablets = await App.find()
-	tab1Docs = tablets.slice()
-//   if (servers[0].up && servers[1].up) {
-// 	  tabNo = 4
-//   } else if (servers[0].up && servers[1].up) {
-//     inedx = servers[0].up ? 0 : 1;
-
-//   } else {
-//     console.log("a7a");
-//   }
-//   io.to(servers[0].sid).emit("5od tablet", "tablet");
-//   io.to(servers[1].sid).emit("5od tablet", "tablet");
+	let tab1Docs = tablets.slice(0,tabletSizes[0])
+	let tab2Docs = tablets.slice(tabletSizes[0],tabletSizes[0]+tabletSizes[1])
+	let tab3Docs = tablets.slice(tabletSizes[0] + tabletSizes[1],tabletSizes[0] + tabletSizes[1] + tabletSizes[2])
+	let tab4Docs = tablets.slice(tabletSizes[0] + tabletSizes[1] + tabletSizes[2])
+  
+  if (servers[0].up == 1 && servers[1].up == 1) {
+	  io.to(servers[0].sid).emit("balance-tablet", [tab1Docs,tab2Docs]);
+    io.to(servers[1].sid).emit("balance-tablet", [tab3Docs,tab4Docs]);
+  } 
+  else if (servers[0].up == 1 || servers[1].up == 1) {
+    index = (servers[0].up == 1)? 0 : 1;
+    io.to(servers[index].sid).emit("balance-tablet", [tab1Docs,tab2Docs,tab3Docs,tab4Docs]);
+  } 
+  else {
+    console.log("error");
+  }
 }
 
 servers = [
@@ -105,6 +101,7 @@ io.on("connection", (socket) => {
       // servers[1].tablets = []  to be done
       i = 1;
     }
+	socket.emit("server-welcome", i, servers[i].port);
     loadBalance();
   });
 

@@ -4,7 +4,7 @@ const mongo = require('mongodb');
 const csvtojson = require("csvtojson");
 
 csvtojson()
-  .fromFile("googleplaystore.csv")
+  .fromFile("../database/googleplaystore.csv")
   .then(csvData => {
     var url = "mongodb://localhost:27017/mydb";
 

@@ -6,6 +6,8 @@ const { set, deleteCells, deleteRow, addRow, read } = require("./queries");
 const { Tab1, Tab2, Tab3, Tab4 } = require("./tablet_model");
 const { connect } = require("./connectDb");
 
+var models = [Tab1, Tab2, Tab3, Tab4];
+
 serverId = -1;
 
 socket.on("connect", () => {
@@ -16,7 +18,7 @@ socket.on("connect", () => {
 socket.emit("tablet-server");
 
 // recieve tablets and initialize the db
-socket.on("server-welcome", (id, tablets, port) => {
+socket.on("server-welcome", (id, port) => {
   console.log(`my Id is ${id} and port is ${port}`);
   serverId = id;
 
@@ -54,7 +56,11 @@ socket.on("server-welcome", (id, tablets, port) => {
   });
 });
 
-
-socket.on('5od tablet', (msg) => {
-	console.log(msg)
-})
+socket.on("balance-tablet", async (tablets) => {
+	for (let i = 0; i < tablets.length; i++) {
+    
+	await addRow(models[i], 'row$key', {Category:'dummy', App:'dummy'})
+	await models[i].collection.drop();
+    await models[i].create(tablets[i]);
+  }
+});
