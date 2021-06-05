@@ -1,5 +1,5 @@
 const io = require("socket.io-client");
-const socket = io.connect("http://localhost:3000");
+const csocket = io.connect("http://localhost:3000");
 const ioServer = require("socket.io");
 const mongoose = require("mongoose");
 const { set, deleteCells, deleteRow, addRow, read } = require("./queries");
@@ -10,15 +10,15 @@ var models = [Tab1, Tab2, Tab3, Tab4];
 
 serverId = -1;
 
-socket.on("connect", () => {
-  console.log(`you connected with ${socket.id}`);
+csocket.on("connect", () => {
+  console.log(`you connected with ${csocket.id}`);
 });
 
 // notify the master that this machine is a server
-socket.emit("tablet-server");
+csocket.emit("tablet-server");
 
 // recieve tablets and initialize the db
-socket.on("server-welcome", (id, port) => {
+csocket.on("server-welcome", (id, port) => {
   console.log(`my Id is ${id} and port is ${port}`);
   serverId = id;
 
@@ -30,37 +30,44 @@ socket.on("server-welcome", (id, port) => {
 
   // handle client requests
   IoServer.on("connection", (socket) => {
-    socket.on("addRow", (row_key, obj, tabNo) => {
+	
+    socket.on("addRow", async (row_key, tabNo, obj) => {
       console.log("A client requests to addrow");
-      addRow(row_key, obj);
-      socket.emit("struc-update", `${serverId}: rows number was changed`);
+      await addRow(models[tabNo], row_key, obj);
+      csocket.emit("update", 1, tabNo, row_key, obj);
     });
 
-    socket.on("deleteRow", (row_key, obj, tabNo) => {
+    socket.on("deleteRow", async (row_key, tabNo) => {
       console.log("delete request");
-      socket.emit("struc-update", `${serverId}: rows number was changed`);
+	  await deleteRow(models[tabNo], row_key)
+      csocket.emit("update", 2, tabNo, row_key);
     });
 
-    socket.on("set", (row_key, obj, tabNo) => {
+    socket.on("set", async (row_key, tabNo, obj) => {
       console.log("set request");
-      socket.emit("data-update", `${serverId}: row-cells number was changed`);
+	  await set(models[tabNo], row_key, obj)
+      csocket.emit("update", 3, tabNo, row_key, obj);
     });
-    socket.on("delete", (row_key, obj, tabNo) => {
+
+    socket.on("deleteCells", async (row_key, tabNo, columns) => {
       console.log("delete cell request");
-      socket.emit("data-update", `${serverId}: row-cells number was changed`);
+	  await deleteCells(models[tabNo], row_key, columns)
+      csocket.emit("update", 4, tabNo, row_key, columns);
     });
-    IoServer.on("read", (row_key, obj, tabNo) => {
+
+    IoServer.on("read", async (row_key, tabNo) => {
       console.log("read request");
-      socket.emit("data-Read", `${serverId}: nothing changed`);
+	  let row = await read(models[tabNo], row_key)
+		socket.emit('read-data', row)
     });
   });
 });
 
-socket.on("balance-tablet", async (tablets) => {
+csocket.on("balance-tablet", async (tablets) => {
 	for (let i = 0; i < tablets.length; i++) {
-    
 	await addRow(models[i], 'row$key', {Category:'dummy', App:'dummy'})
 	await models[i].collection.drop();
-    await models[i].create(tablets[i]);
+	if (tablets[i] != null)
+    	await models[i].create(tablets[i]);
   }
 });

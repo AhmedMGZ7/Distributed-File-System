@@ -1,4 +1,3 @@
-// const { App } = require('./App_model')
 
 
 module.exports.set = async function set(Model, row_key, obj) {
@@ -34,6 +33,7 @@ module.exports.read = async function read(Model, row_key) {
 	console.log(cat, name)
 	let app = await Model.find({ Category: cat, App: name })
     console.log(app)
+	return app;
 }
 
 module.exports.addRow = async function addRow(Model, row_key, obj) {
