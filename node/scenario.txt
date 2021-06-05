@@ -10,3 +10,19 @@
 4 - start clients
 	i  - Master send the metadata to be cached.
 	ii - 
+
+
+
+
+	---------------------------------------------------
+	load balancing
+	number that each tablet server should have = documents count / tablets count
+		current tablet = 0
+		for each category
+			if current tablet count + next category <= number that each tablet should have
+				assign category to tablet
+				current tablet count += current category count
+			else
+				if current tablet < number of tablets
+					current tablet ++
+				else 5od w 5alas

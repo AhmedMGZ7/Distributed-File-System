@@ -5,20 +5,24 @@ const schema = new mongoose.Schema({
     type: String,
     minlength: 1,
     maxlength: 255,
-	unique: true,
-	validate: {
-		validator: (v) => {
-			if (v.includes('$'))
-				return false;
-		},
-		message: "Can't contain $"
-	}
+    unique: true,
+    validate: {
+      validator: (v) => {
+        if (v.includes("$")) return false;
+      },
+      message: "Can't contain $",
+    },
   },
   Category: {
     type: String,
     minlength: 1,
     maxlength: 255,
-	match: /[^$]/
+    validate: {
+      validator: (v) => {
+        if (v.includes("$")) return false;
+      },
+      message: "Can't contain $",
+    },
   },
   Rating: {
     type: String,
@@ -79,4 +83,4 @@ const schema = new mongoose.Schema({
 
 const App = mongoose.model("App", schema);
 
-module.exports = App
+module.exports.App = App;
