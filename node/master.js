@@ -1,17 +1,23 @@
 const io = require("socket.io")(3000);
-const mongoose = require("mongoose");
 const { set, deleteCells, deleteRow, addRow, read } = require("./queries");
+const mongoose = require("mongoose");
 const { connect } = require("./connectDb");
 const { App } = require("./App_model");
+const fs = require("fs").promises;
+const moment = require("moment");
+
 // , {
 // 	cors: {
 // 	  origin: ["http://localhost:8080"],
 // 	},
 //   }
+async function documentQueries(data) {
+  await fs.writeFile("log.log", data, { flag: "a+" });
+}
 
 // meta data - data structures
 catTabletDict = {};
-tabletSizes = [0,0,0,0];
+tabletSizes = [0, 0, 0, 0];
 tabMachineDict = [];
 clients = [];
 servers = [
@@ -30,9 +36,10 @@ io.on("connection", (socket) => {
   // connected to client
   socket.on("client", () => {
     clients.push(socket.id);
-	if (servers[0].up || servers[1].up)
-    	sendMetaData()
-    
+    sendMetaData();
+    if (servers[0].up == 1 || servers[1].up == 1) {
+      socket.emit("start");
+    }
   });
 
   // connected to tablet server
@@ -47,6 +54,12 @@ io.on("connection", (socket) => {
       servers[1].up = 1;
       servers[1].sid = socket.id;
       i = 1;
+    }
+	// if one is not up then there were  none up before this one starts
+	// so the clients were stopped
+    if (!(servers[0].up && servers[1].up)) {
+      io.to(clients[0]).emit("start", catTabletDict, tabMachineDict);
+      io.to(clients[1]).emit("start", catTabletDict, tabMachineDict);
     }
     socket.emit("server-welcome", i, servers[i].port);
     await loadBalance();
@@ -85,9 +98,12 @@ io.on("connection", (socket) => {
     await loadBalance();
   });
 
+  ops = ["Read", "Add Row", "Delete row", "Set", "Delete cells"];
   socket.on("update", async (op, tabNo, row_key, obj) => {
     // update the db
     switch (op) {
+      case 0:
+        break;
       case 1:
         addRow(App, row_key, obj);
         tabletSizes[tabNo] += 1;
@@ -107,6 +123,14 @@ io.on("connection", (socket) => {
         deleteCells(App, row_key, obj);
         break;
     }
+
+    sentFrom = socket.id == servers[0].sid ? 0 : 1;
+    // logging
+    await documentQueries(
+      `${
+        ops[op]
+      } operation on Server ${sentFrom} on tablet ${tabNo} at ${TimeNow()}\n`
+    );
   });
 });
 
@@ -145,14 +169,13 @@ async function loadBalance() {
 
   categories.forEach((category) => {
     // If tablet is full and not the last one go to next
-    if (currentTabletSize + category.total > tabCount)
-	{	if (currentTablet < 3) {
-		tabletSizes[currentTablet] = currentTabletSize;
-		currentTablet += 1;
-		currentTabletSize = 0;
-		console.log('xd', currentTablet)
-		} 
-	}
+    if (currentTabletSize + category.total > tabCount) {
+      if (currentTablet < 3) {
+        tabletSizes[currentTablet] = currentTabletSize;
+        currentTablet += 1;
+        currentTabletSize = 0;
+      }
+    }
     catTabletDict[category._id] = currentTablet;
     currentTabletSize += category.total;
   });
@@ -165,10 +188,16 @@ async function loadBalance() {
     tabletSizes[3],
   ];
 
-  let tablets = await App.find({},{}, { sort: {
-	  Category: '1'
-  }});
-  console.log("tablets" + tablets)
+  let tablets = await App.find(
+    {},
+    {},
+    {
+      sort: {
+        Category: "1",
+      },
+    }
+  );
+  //   console.log("tablets" + tablets)
   let tab1Docs = tablets.slice(0, tabletSizes[0]);
   let tab2Docs = tablets.slice(tabletSizes[0], tabletSizes[0] + tabletSizes[1]);
   let tab3Docs = tablets.slice(
@@ -178,9 +207,9 @@ async function loadBalance() {
   let tab4Docs = tablets.slice(
     tabletSizes[0] + tabletSizes[1] + tabletSizes[2]
   );
-	console.log("tabletSizes", tabletSizes)
-	console.log("tab2Docs", tab2Docs )
-	console.log("tab4Doc", tab4Docs)
+  // console.log("tabletSizes", tabletSizes)
+  // console.log("tab2Docs", tab2Docs )
+  // console.log("tab4Doc", tab4Docs)
   if (servers[0].up == 1 && servers[1].up == 1) {
     io.to(servers[0].sid).emit("balance-tablet", [
       tab1Docs,
@@ -207,7 +236,7 @@ async function loadBalance() {
   } else {
     io.to(clients[0]).emit("stop", catTabletDict, tabMachineDict);
     io.to(clients[1]).emit("stop", catTabletDict, tabMachineDict);
-	return
+    return;
   }
   sendMetaData();
 }
@@ -217,3 +246,9 @@ function sendMetaData() {
   io.to(clients[0]).emit("meta", catTabletDict, tabMachineDict);
   io.to(clients[1]).emit("meta", catTabletDict, tabMachineDict);
 }
+
+const TimeNow = () => {
+  var date = moment().format().split(":");
+  var current_date = date[0] + ":" + date[1];
+  return current_date;
+};

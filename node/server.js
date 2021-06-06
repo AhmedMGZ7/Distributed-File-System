@@ -57,6 +57,7 @@ csocket.on("server-welcome", (id, port) => {
       console.log("read request");
       let row = await read(models[tabNo], query);
       socket.emit("read-data", row);
+      csocket.emit("update", 0, tabNo, query);
     });
   });
 });
@@ -65,9 +66,9 @@ csocket.on("balance-tablet", async (tablets) => {
   for (let i = 0; i < tablets.length; i++) {
     if (await models[i].exists({})) {
       await models[i].collection.drop();
-    }
-    else{
-	 if (tablets[i] != null) await models[i].create(tablets[i]);
-	}	
+    } 
+	 
+    if (tablets[i] != null) await models[i].create(tablets[i]);
+    
   }
 });
