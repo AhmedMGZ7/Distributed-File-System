@@ -3,13 +3,13 @@ import json
 import pandas as pd
 import math
 
-clients = [
-    "tcp://127.0.0.1:8001",  # the master
-    "tcp://127.0.0.1:8002",  # tablet server 1
-    "tcp://127.0.0.1:8003",  # tablet server 2
-    "tcp://127.0.0.1:8004",  # client server 1
-    "tcp://127.0.0.1:8004",  # client server 2
-]
+localhost = "tcp://127.0.0.1" 
+ServerMasterPort = 8001  # Server - Master (req-rep) used to notify the master of queries
+MasterServerPort = 8002  # Master - server  (req-rep) used to make Polling
+    # "tcp://127.0.0.1:8003",  # tablet server 2
+    # "tcp://127.0.0.1:8004",  # client server 1
+    # "tcp://127.0.0.1:8004",  # client server 2
+
 # read csv from excel and save it in array of json
 
 
@@ -75,6 +75,6 @@ for i in range(no_of_categories):
     no_in_currentTablet += 1
 dic_tablet_in_machine[tablet_no] = Machine
 
-print(dic_tablet_in_machine)
-print(dic_category_in_tablet)
-print()
+# print(dic_tablet_in_machine)
+# print(dic_category_in_tablet)
+# print()
