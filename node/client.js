@@ -3,7 +3,7 @@ const socket = io.connect("http://localhost:3000");
 const server1socket = io.connect("http://localhost:3001");
 const server2socket = io.connect("http://localhost:3002");
 // const {getUserQuery} = require("./userInput");
-const prompt = require("prompt");
+// const prompt = require("prompt");
 const fs = require("fs").promises;
 
 // meta data - data structures
@@ -25,17 +25,13 @@ socket.on("connect", () => {
   socket.emit("client");
 });
 
+socket.on('start', async () => {
+	setIntervalId = sendQuery(index, queryList)
+})
+
 socket.on("meta", async (catTabletDict, tabMachineDict) => {
   global.catTabletDict = catTabletDict;
   global.tabMachineDict = tabMachineDict;
-  
-  clearInterval(setIntervalId)
-  setIntervalId = sendQuery(index, queryList)
-  //   console.log(global.catTabletDict, global.tabMachineDict);
-
-  //   prompt.start();
-  //   const result = await prompt.get(["Category", "AppName"]);
-  //   console.log(result.Category, result.AppName);
 });
 
 socket.on('stop', () => {
@@ -79,9 +75,9 @@ function sendQuery(index, queryList) {
 		var server = getDesiredServer(queryList[index].Category, global.catTabletDict, global.tabMachineDict);
 		query = queryList[index]
 		op = query.operation;
-		index += 1;
 		
-		console.log(index, op, queryList)
+		console.log(index, op)
+		index += 1;
 		let tabNo = global.catTabletDict[query.Category]
 		if (op == 1) {
 			server.emit("addRow", tabNo, query);
@@ -100,6 +96,6 @@ function sendQuery(index, queryList) {
 			console.log("done signal from vlsi project");
 			setTimeout(() => {process.exit()}, 1000) 
 		}
-	}, 1000);
+	}, 2000);
 }
 
