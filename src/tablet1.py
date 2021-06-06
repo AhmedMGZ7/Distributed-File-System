@@ -8,7 +8,6 @@ socket.bind(tablet_ips[current_tablet])
 
 while True:
     msg = socket.recv()
-
     print("From Client :", msg)
     smsg = input('enter your message : ')
     socket.send_string(smsg)
