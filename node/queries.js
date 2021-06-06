@@ -1,7 +1,7 @@
 const _ = require('lodash')
 
 module.exports.set = async function set(Model, query) {
-	obj = _.omit(query, ['operation Category'])
+	obj = _.omit(query, ['operation', 'Category'])
 	console.log(obj)
 	let app = await Model.findOneAndUpdate({ Category: query.Category, App: query.App }, obj)
 	
@@ -10,7 +10,10 @@ module.exports.set = async function set(Model, query) {
 }
 
 module.exports.deleteCells = async function deleteCells(Model, query) {
-	obj = _.omit(query, ['operation App Category'])
+	obj = _.omit(query, ['operation', 'App', 'Category'])
+	Object.keys(obj).forEach(o => {
+        obj[o] = 1
+    })
 	console.log(obj)
 	let app = await Model.findOneAndUpdate({ Category: query.Category, App: query.App }, { $unset: obj})
 	
