@@ -66,4 +66,4 @@ function getDesiredServer(cat,catTabletDict,tabMachineDict) {
     return (tabMachineDict[catTabletDict[cat]]) == 0 
       ? server1socket
       : server2socket;
-  }
+  }yyyyyyyyyyyyyyyyyyy
