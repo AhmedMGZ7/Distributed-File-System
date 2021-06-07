@@ -29,9 +29,9 @@ servers = [
     sid: -1,
     tablets: [],
     port: 3001,
-    ip: "",
+    address: "",
   },
-  { up: 0, sid: -1, tablets: [], port: 3002, ip: "" },
+  { up: 0, sid: -1, tablets: [], port: 3002, address: "" },
 ];
 
 connect("localhost", "GoogleApps");
