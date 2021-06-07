@@ -1,9 +1,14 @@
 const io = require("socket.io-client");
-const socket = io.connect("http://localhost:3000");
-const server1socket = io.connect("http://localhost:3001");
-const server2socket = io.connect("http://localhost:3002");
-// const {getUserQuery} = require("./userInput");
-// const prompt = require("prompt");
+let MasterUrl = "http://b645f9a8b70c.ngrok.io/"
+let server1Url = "http://2701c8b92c84.ngrok.io/"//"http://8d069fd894c3.ngrok.io/"
+let server2Url = ""//"http://2701c8b92c84.ngrok.io/"
+
+
+const socket = io.connect(`${MasterUrl}`);
+const server1socket = io.connect(`${server1Url}`);
+const server2socket = io.connect(`${server2Url}`);
+
+
 const fs = require("fs").promises;
 
 // meta data - data structures
@@ -76,15 +81,14 @@ function sendQuery(index, queryList) {
 		query = queryList[index]
 		op = query.operation;
 		
-		console.log(index, op)
 		index += 1;
+		console.log(`sending query number ${index}`)
 		let tabNo = global.catTabletDict[query.Category]
 		if (op == 1) {
 			server.emit("addRow", tabNo, query);
 		} else if (op == 2) {
 			server.emit("deleteRow", tabNo, query);
 		} else if (op == 3) {
-			console.log("reaaaaaaaaaaaad")
 			server.emit("read", tabNo, query);
 		} else if (op == 4) {
 			server.emit("set", tabNo, query);
@@ -93,7 +97,7 @@ function sendQuery(index, queryList) {
 		}
 
 		if (index == limit) {
-			console.log("done signal from vlsi project");
+			console.log("done signal");
 			setTimeout(() => {process.exit()}, 1000) 
 		}
 	}, 2000);

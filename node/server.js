@@ -1,5 +1,7 @@
 const io = require("socket.io-client");
-const csocket = io.connect("http://localhost:3000");
+
+let MasterUrl = ""
+const csocket = io.connect(`${MasterUrl}`);
 const ioServer = require("socket.io");
 const { set, deleteCells, deleteRow, addRow, read } = require("./queries");
 const { Tab1, Tab2, Tab3, Tab4 } = require("./tablet_model");
@@ -18,14 +20,14 @@ csocket.emit("tablet-server");
 
 // recieve tablets and initialize the db
 csocket.on("server-welcome", (id, port) => {
-  console.log(`my Id is ${id} and port is ${port}`);
+  console.log(`my Id is ${id}`);
   serverId = id;
 
   // connect to db
   connect("localhost", `db${port}`);
 
   // create server socket for clients on port recieved from master
-  const IoServer = ioServer(port);
+  const IoServer = ioServer(3000);
 
   // handle client requests
   IoServer.on("connection", (socket) => {
