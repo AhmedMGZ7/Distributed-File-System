@@ -1,11 +1,12 @@
 const io = require("socket.io-client");
-let MasterUrl = "http://b645f9a8b70c.ngrok.io/";
+let MasterUrl = "http://localhost:3000";
 const csocket = io.connect(`${MasterUrl}`);
 const ioServer = require("socket.io");
 const { set, deleteCells, deleteRow, addRow, read } = require("./queries");
 const { Tab1, Tab2, Tab3, Tab4 } = require("./tablet_model");
 const { connect } = require("./connectDb");
-
+var myPort = 3002;
+var myAddress = `http://localhost:${myPort}`;
 var models = [Tab1, Tab2, Tab3, Tab4];
 
 serverId = -1;
@@ -15,7 +16,7 @@ csocket.on("connect", () => {
 });
 
 // notify the master that this machine is a server
-csocket.emit("tablet-server");
+csocket.emit("tablet-server", myAddress);
 
 // recieve tablets and initialize the db
 csocket.on("server-welcome", (id, port) => {
@@ -23,15 +24,15 @@ csocket.on("server-welcome", (id, port) => {
   serverId = id;
 
   // connect to db
-  connect("localhost", `db${port}`);
+  connect("localhost", `db${myPort}`);
 
   // create server socket for clients on port recieved from master
-  const IoServer = ioServer(3000);
+  const IoServer = ioServer(myPort);
 
   // handle client requests
   IoServer.on("connection", (socket) => {
     socket.on("addRow", async (tabNo, query) => {
-      console.log("A client requests to addrow");
+      console.log("A client requests to add row");
       await addRow(models[tabNo], query);
       csocket.emit("update", 1, tabNo, query);
     });

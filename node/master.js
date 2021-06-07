@@ -11,6 +11,7 @@ const moment = require("moment");
 // 	  origin: ["http://localhost:8080"],
 // 	},
 //   }
+
 async function documentQueries(data) {
   await fs.writeFile("log.log", data, { flag: "a+" });
 }
@@ -43,13 +44,17 @@ io.on("connection", (socket) => {
     if (servers[0].up == 1 || servers[1].up == 1) {
       socket.emit("start");
     }
+
+    io.to(clients[0]).emit("servers", servers);
+    io.to(clients[1]).emit("servers", servers);
   });
 
   // connected to tablet server
-  socket.on("tablet-server", async () => {
+  socket.on("tablet-server", async (address) => {
     let i = -1;
-    var address = socket.handshake.address;
-    console.log("New connection from " + address.address + ":" + address.port);
+    // print(socket);
+    // var address = socket.handshake.address;
+    console.log("New connection from " + address);
     if (!servers[0].up) {
       servers[0].up = 1;
       servers[0].sid = socket.id;

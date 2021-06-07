@@ -1,11 +1,16 @@
 const io = require("socket.io-client");
-let MasterUrl = "http://b645f9a8b70c.ngrok.io/";
+let MasterUrl = "http://localhost:3000";
+// let server1Url = "http://localhost:3001"; //"http://8d069fd894c3.ngrok.io/"
+// let server2Url = "http://localhost:3002"; //"http://2701c8b92c84.ngrok.io/"
+
 let server1Url = ""; //"http://8d069fd894c3.ngrok.io/"
 let server2Url = ""; //"http://2701c8b92c84.ngrok.io/"
 
 const socket = io.connect(`${MasterUrl}`);
-const server1socket = io.connect(`${server1Url}`);
-const server2socket = io.connect(`${server2Url}`);
+var server1socket = null;
+var server2socket = null;
+// var server1socket = io.connect(`${server1Url}`);
+// var server2socket = io.connect(`${server2Url}`);
 
 const fs = require("fs").promises;
 
@@ -33,31 +38,37 @@ socket.on("start", async () => {
 });
 
 socket.on("meta", async (catTabletDict, tabMachineDict) => {
+  console.log("meta is received");
   global.catTabletDict = catTabletDict;
   global.tabMachineDict = tabMachineDict;
 });
 
-socket.on("servers", async (server) => {
+socket.on("servers", async (servers) => {
   global.server1Url = servers[0].address;
   global.server2Url = servers[1].address;
+
+  console.log("server 1 ", servers[0].address);
+  console.log("server 2 ", servers[1].address);
+  server1socket = io.connect(`${servers[0].address}`);
+  server2socket = io.connect(`${servers[1].address}`);
+
+  server1socket.on("connect", () => {
+    console.log("connected with server 1");
+  });
+  server2socket.on("connect", () => {
+    console.log("connected with server 2");
+  });
+
+  server1socket.on("read-data", (row) => {
+    console.log(row);
+  });
+  server2socket.on("read-data", (row) => {
+    console.log(row);
+  });
 });
 
 socket.on("stop", () => {
   clearInterval(setIntervalId);
-});
-
-server1socket.on("connect", () => {
-  console.log("connected with server 1");
-});
-server2socket.on("connect", () => {
-  console.log("connected with server 2");
-});
-
-server1socket.on("read-data", (row) => {
-  console.log(row);
-});
-server2socket.on("read-data", (row) => {
-  console.log(row);
 });
 
 function getDesiredServer(cat, catTabletDict, tabMachineDict) {
