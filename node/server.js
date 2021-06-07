@@ -1,5 +1,6 @@
 const io = require("socket.io-client");
-const csocket = io.connect("http://b645f9a8b70c.ngrok.io/");
+let MasterUrl = "http://b645f9a8b70c.ngrok.io/";
+const csocket = io.connect(`${MasterUrl}`);
 const ioServer = require("socket.io");
 const { set, deleteCells, deleteRow, addRow, read } = require("./queries");
 const { Tab1, Tab2, Tab3, Tab4 } = require("./tablet_model");
@@ -18,7 +19,7 @@ csocket.emit("tablet-server");
 
 // recieve tablets and initialize the db
 csocket.on("server-welcome", (id, port) => {
-  console.log(`my Id is ${id} and port is ${port}`);
+  console.log(`my Id is ${id}`);
   serverId = id;
 
   // connect to db
