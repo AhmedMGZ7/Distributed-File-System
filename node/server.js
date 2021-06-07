@@ -1,5 +1,5 @@
 const io = require("socket.io-client");
-const csocket = io.connect("http://localhost:3000");
+const csocket = io.connect("http://b645f9a8b70c.ngrok.io/");
 const ioServer = require("socket.io");
 const { set, deleteCells, deleteRow, addRow, read } = require("./queries");
 const { Tab1, Tab2, Tab3, Tab4 } = require("./tablet_model");
@@ -25,7 +25,7 @@ csocket.on("server-welcome", (id, port) => {
   connect("localhost", `db${port}`);
 
   // create server socket for clients on port recieved from master
-  const IoServer = ioServer(port);
+  const IoServer = ioServer(3000);
 
   // handle client requests
   IoServer.on("connection", (socket) => {
@@ -66,9 +66,8 @@ csocket.on("balance-tablet", async (tablets) => {
   for (let i = 0; i < tablets.length; i++) {
     if (await models[i].exists({})) {
       await models[i].collection.drop();
-    } 
-	 
+    }
+
     if (tablets[i] != null) await models[i].create(tablets[i]);
-    
   }
 });
