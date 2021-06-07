@@ -1,7 +1,45 @@
 [
   {
+    "operation": 2,
+    "App": "Mohamedsfd",
+    "Category": "SPORTS"
+  },
+  {
+    "operation": 2,
+    "App": "Mohamedeen",
+    "Category": "GAME"
+  },
+  {
     "operation": 1,
-    "App": "Omar",
+    "App": "Mohamedsfd",
+    "Category": "ART_AND_DESIGN",
+    "Rating": "farahat",
+    "Reviews": "2-0",
+    "Size": "4-1",
+    "Installs": "6-1",
+    "Type": "52",
+    "Price": "eeeeeeeeeeeh",
+    "Content Rating": "heeeeeeeeh",
+    "Genres": "a7eeeeeeeeh",
+    "Last Updated": "keeeeeeh",
+    "Current Ver": "s",
+    "Android Ver": "b"
+  },
+  {
+    "operation": 4,
+    "App": "Mohamedsfd",
+    "Category": "ART_AND_DESIGN",
+    "Last Updated": "updated"
+  },
+  {
+    "operation": 5,
+    "App": "Mohamedsfd",
+    "Category": "ART_AND_DESIGN",
+    "Android Ver": "b"
+  },
+  {
+    "operation": 1,
+    "App": "Mohamedeen",
     "Category": "ART_AND_DESIGN",
     "Rating": "farahat",
     "Reviews": "2-0",
@@ -17,12 +55,12 @@
   },
   {
     "operation": 3,
-    "App": "Omar",
+    "App": "Mohamedeen",
     "Category": "ART_AND_DESIGN"
   },
   {
-    "operation": 2,
-    "App": "Omar",
-    "Category": "ART_AND_DESIGN"
+    "operation": 3,
+    "App": "Mohamedsfd",
+    "Category": "SPORTS"
   }
 ]

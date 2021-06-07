@@ -19,15 +19,18 @@ async function documentQueries(data) {
 catTabletDict = {};
 tabletSizes = [0, 0, 0, 0];
 tabMachineDict = [];
-clients = [];
+clients = []; // store the ips of the clients
+
+// servers meta data
 servers = [
   {
     up: 0,
     sid: -1,
     tablets: [],
     port: 3001,
+    ip: "",
   },
-  { up: 0, sid: -1, tablets: [], port: 3002 },
+  { up: 0, sid: -1, tablets: [], port: 3002, ip: "" },
 ];
 
 connect("localhost", "GoogleApps");
@@ -45,24 +48,32 @@ io.on("connection", (socket) => {
   // connected to tablet server
   socket.on("tablet-server", async () => {
     let i = -1;
+    var address = socket.handshake.address;
+    console.log("New connection from " + address.address + ":" + address.port);
     if (!servers[0].up) {
       servers[0].up = 1;
       servers[0].sid = socket.id;
-
+      servers[0].address = address;
       i = 0;
     } else {
       servers[1].up = 1;
       servers[1].sid = socket.id;
+      servers[1].address = address;
       i = 1;
     }
-	// if one is not up then there were  none up before this one starts
-	// so the clients were stopped
+    // if one is not up then there were  none up before this one starts
+    // so the clients were stopped
     if (!(servers[0].up && servers[1].up)) {
+      // check if or
       io.to(clients[0]).emit("start", catTabletDict, tabMachineDict);
       io.to(clients[1]).emit("start", catTabletDict, tabMachineDict);
     }
+
+    io.to(clients[0]).emit("servers", servers);
+    io.to(clients[1]).emit("servers", servers);
+
     socket.emit("server-welcome", i, servers[i].port);
-    await loadBalance();
+    await loadBalance(); // why call it after data is sent
   });
 
   // A machine has disconnected
@@ -95,7 +106,11 @@ io.on("connection", (socket) => {
         port: 3002,
       };
     }
-    await loadBalance();
+
+    io.to(clients[0]).emit("servers", servers);
+    io.to(clients[1]).emit("servers", servers);
+
+    await loadBalance(); // inform the clients of the change
   });
 
   ops = ["Read", "Add Row", "Delete row", "Set", "Delete cells"];
@@ -243,6 +258,7 @@ async function loadBalance() {
 
 function sendMetaData() {
   // send meta data
+  // TODO: what if only one client
   io.to(clients[0]).emit("meta", catTabletDict, tabMachineDict);
   io.to(clients[1]).emit("meta", catTabletDict, tabMachineDict);
 }
